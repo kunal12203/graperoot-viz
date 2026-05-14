@@ -1,0 +1,15 @@
+node_modules/
+dist/
+dist-electron/
+*.pyc
+__pycache__/
+build/
+enterprise/bridge/dist/
+enterprise/bridge/build/
+bridge/dist/
+bridge/build/
+*.spec.bak
+.DS_Store
+*.log
+.dual-graph-pro/
+.mcp.json

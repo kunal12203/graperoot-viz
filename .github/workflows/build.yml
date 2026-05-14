@@ -1,0 +1,121 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'          # triggers on: git tag v1.0.0 && git push --tags
+  workflow_dispatch:       # allows manual trigger from GitHub UI
+
+permissions:
+  contents: write          # needed to create/upload GitHub Releases
+
+jobs:
+  # ── macOS → universal DMG (Intel + Apple Silicon) ──────────────────────────
+  build-mac:
+    runs-on: macos-14      # Apple Silicon runner (builds universal binary)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build enterprise viewer
+        run: |
+          cd enterprise/viewer
+          npm ci
+          npm run build
+
+      - name: Bundle Python bridge (PyInstaller)
+        run: |
+          cd enterprise/bridge
+          pip install pyinstaller fastapi "uvicorn[standard]" --quiet
+          pyinstaller --clean --noconfirm graperoot-server.spec
+
+      - name: Build & publish DMG
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Uncomment when you have Apple Developer certs:
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          cd electron
+          npm ci
+          npx electron-builder --mac --publish always
+
+  # ── Linux → AppImage + .deb ────────────────────────────────────────────────
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build enterprise viewer
+        run: |
+          cd enterprise/viewer
+          npm ci
+          npm run build
+
+      - name: Bundle Python bridge (PyInstaller)
+        run: |
+          cd enterprise/bridge
+          pip install pyinstaller fastapi "uvicorn[standard]" --quiet
+          pyinstaller --clean --noconfirm graperoot-server.spec
+
+      - name: Install Linux packaging deps
+        run: sudo apt-get install -y rpm fakeroot
+
+      - name: Build & publish AppImage + deb
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd electron
+          npm ci
+          npx electron-builder --linux --publish always
+
+  # ── Windows → NSIS installer (.exe) ────────────────────────────────────────
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build enterprise viewer
+        run: |
+          cd enterprise/viewer
+          npm ci
+          npm run build
+
+      - name: Bundle Python bridge (PyInstaller)
+        shell: pwsh
+        run: |
+          cd enterprise/bridge
+          pip install pyinstaller fastapi uvicorn --quiet
+          python -m PyInstaller --clean --noconfirm graperoot-server.spec
+
+      - name: Build & publish EXE
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd electron
+          npm ci
+          npx electron-builder --win --publish always

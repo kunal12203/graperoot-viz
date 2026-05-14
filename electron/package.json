@@ -1,0 +1,23 @@
+{
+  "name": "graperoot-viz",
+  "version": "1.0.0",
+  "description": "GrapeRoot Viz — 3D multi-repo code graph visualizer",
+  "main": "main.cjs",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build:renderer": "cd ../enterprise/viewer && npm install && npm run build",
+    "build:sidecar:mac": "cd ../enterprise/bridge && pip install pyinstaller fastapi 'uvicorn[standard]' && pyinstaller --clean graperoot-server.spec",
+    "build:sidecar:win": "cd ../enterprise/bridge && pip install pyinstaller fastapi uvicorn && pyinstaller --clean graperoot-server.spec",
+    "build:app": "electron-builder --config electron-builder.yml",
+    "build:mac": "npm run build:renderer && npm run build:sidecar:mac && electron-builder --mac --config electron-builder.yml",
+    "build:win": "npm run build:renderer && npm run build:sidecar:win && electron-builder --win --config electron-builder.yml"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

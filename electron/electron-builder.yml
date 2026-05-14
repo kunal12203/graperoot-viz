@@ -1,0 +1,86 @@
+appId: com.graperoot.viz
+productName: GrapeRoot Viz
+copyright: Copyright © 2024 GrapeRoot
+
+# GitHub Releases — auto-updater checks here for new versions
+publish:
+  provider: github
+  releaseType: release
+
+directories:
+  output: ../dist-electron
+  buildResources: assets
+
+# Files included in the Electron asar (main + preload only; renderer is extraResources)
+files:
+  - main.cjs
+  - preload.cjs
+
+# Renderer bundle and Python sidecar live outside the asar for fast file access
+extraResources:
+  - from: ../enterprise/viewer/dist
+    to: renderer
+    filter:
+      - "**/*"
+      - "!**/*.map"
+
+# ── macOS ──────────────────────────────────────────────────────────────────────
+mac:
+  category: public.app-category.developer-tools
+  icon: assets/icon.icns
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  extraResources:
+    - from: ../enterprise/bridge/dist/server
+      to: bridge/server
+  target:
+    - target: dmg
+      arch:
+        - universal   # fat binary: Intel + Apple Silicon
+    - target: zip
+      arch:
+        - universal
+
+dmg:
+  title: GrapeRoot Viz ${version}
+  writeUpdateInfo: false
+  contents:
+    - x: 410
+      y: 150
+      type: link
+      path: /Applications
+    - x: 130
+      y: 150
+      type: file
+
+# ── Windows ────────────────────────────────────────────────────────────────────
+win:
+  icon: assets/icon.ico
+  extraResources:
+    - from: ../enterprise/bridge/dist/server.exe
+      to: bridge/server.exe
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: GrapeRoot Viz
+
+# ── Linux ──────────────────────────────────────────────────────────────────────
+linux:
+  category: Development
+  extraResources:
+    - from: ../enterprise/bridge/dist/server
+      to: bridge/server
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64

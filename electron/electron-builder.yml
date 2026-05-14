@@ -36,10 +36,10 @@ mac:
   target:
     - target: dmg
       arch:
-        - universal   # fat binary: Intel + Apple Silicon
+        - arm64   # Apple Silicon (Intel Macs run via Rosetta 2)
     - target: zip
       arch:
-        - universal
+        - arm64
 
 dmg:
   title: GrapeRoot Viz ${version}

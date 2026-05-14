@@ -2,7 +2,10 @@
   "name": "graperoot-viz",
   "version": "1.0.0",
   "description": "GrapeRoot Viz — 3D multi-repo code graph visualizer",
-  "author": "kunal12203",
+  "author": {
+    "name": "kunal12203",
+    "email": "maharshiv992@gmail.com"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/kunal12203/graperoot-viz.git"

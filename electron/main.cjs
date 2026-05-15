@@ -110,7 +110,10 @@ async function createWindow(port) {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,  // allows process.env access in preload
+      sandbox: false,
+      // Required: renderer loads via file:// but fetches from http://127.0.0.1.
+      // Without this, Electron blocks the cross-origin request → blank screen.
+      webSecurity: false,
     },
   });
 
